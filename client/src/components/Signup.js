@@ -24,11 +24,25 @@ const Signup = () => {
     e.preventDefault();
     setError("");
 
-    const result = await signup(formData);
-    if (result.success) {
-      navigate("/dashboard");
-    } else {
-      setError(result.error);
+    try {
+      console.log("Form submitted with data:", {
+        ...formData,
+        password: "[REDACTED]",
+      });
+
+      const result = await signup(formData);
+      console.log("Signup result:", result);
+
+      if (result.success) {
+        console.log("Signup successful, navigating to dashboard");
+        navigate("/dashboard");
+      } else {
+        console.error("Signup failed with error:", result.error);
+        setError(result.error || "Unknown error occurred during signup");
+      }
+    } catch (error) {
+      console.error("Exception during signup:", error);
+      setError("An unexpected error occurred: " + error.message);
     }
   };
 

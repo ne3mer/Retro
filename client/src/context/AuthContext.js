@@ -17,6 +17,8 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
     } catch (error) {
       console.error("Auth check failed:", error);
+      // Don't redirect if auth check fails - just set user to null
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -37,13 +39,27 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
+      console.log("Attempting signup with data:", {
+        ...userData,
+        password: "[REDACTED]",
+      });
+
+      // Log the base URL being used
+      console.log("API Base URL:", axios.defaults.baseURL);
+
       const { data } = await axios.post("/auth/signup", userData);
+      console.log("Signup successful, received data:", data);
+
       setUser(data.user);
       return { success: true };
     } catch (error) {
+      console.error("Signup failed:", error);
+      console.error("Error response:", error.response?.data);
+
       return {
         success: false,
-        error: error.response?.data?.message || "Signup failed",
+        error:
+          error.response?.data?.message || "Signup failed: " + error.message,
       };
     }
   };
