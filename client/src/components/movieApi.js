@@ -126,3 +126,42 @@ export const getFallbackMovieDetails = (movieId) => {
     }
   );
 };
+
+// Get favorite status for a movie
+export const checkFavoriteStatus = async (movieId) => {
+  try {
+    const response = await api.get(`/api/movies/favorites/${movieId}/check`);
+    return response.data.isFavorite;
+  } catch (error) {
+    console.error(
+      `Error checking favorite status for movie ${movieId}:`,
+      error
+    );
+    return false;
+  }
+};
+
+// Toggle favorite status
+export const toggleFavorite = async (movieId) => {
+  try {
+    const response = await api.post(`/api/movies/favorites/${movieId}`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error toggling favorite status for movie ${movieId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+// Get user's favorite movies
+export const getFavoriteMovies = async () => {
+  try {
+    const response = await api.get("/api/movies/favorites");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching favorite movies:", error);
+    return [];
+  }
+};
