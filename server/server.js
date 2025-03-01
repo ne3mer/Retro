@@ -27,8 +27,10 @@ mongoose
 const allowedOrigins = [
   "https://retro-ebon.vercel.app",
   "https://retro.vercel.app",
+  "https://retro-bi0zcrnlx-ne3mers-projects.vercel.app",
   "http://localhost:3000",
   "http://localhost:3001",
+  "https://retro-64h4.onrender.com",
 ];
 
 app.use(
@@ -42,7 +44,7 @@ app.use(
           "The CORS policy for this site does not allow access from the specified Origin.";
         return callback(new Error(msg), false);
       }
-      return callback(null, true);
+      return callback(null, origin);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -52,6 +54,7 @@ app.use(
       "X-Requested-With",
       "Accept",
       "Origin",
+      "Cookie",
     ],
     exposedHeaders: ["set-cookie"],
     preflightContinue: false,
@@ -85,6 +88,21 @@ app.get("/health", (req, res) => {
     mongoConnection: mongoose.connection.readyState === 1,
     timestamp: new Date().toISOString(),
   });
+});
+
+// Update cookie settings in auth routes
+app.use((req, res, next) => {
+  res.cookie = res.cookie.bind(res);
+  const originalCookie = res.cookie;
+  res.cookie = function (name, value, options = {}) {
+    return originalCookie.call(this, name, value, {
+      ...options,
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    });
+  };
+  next();
 });
 
 // Add CORS error handler before other error handlers
