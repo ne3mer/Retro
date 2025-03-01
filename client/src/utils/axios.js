@@ -13,7 +13,7 @@ console.log(
 );
 
 const api = axios.create({
-  baseURL,
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5001",
   withCredentials: true,
   timeout: 30000, // Increased timeout for Render's cold start
   headers: {
@@ -44,41 +44,22 @@ api.interceptors.request.use(
 
 // Add response interceptor for error handling
 api.interceptors.response.use(
-  (response) => {
-    if (!isProduction) {
-      console.log("API Response:", response.status, response.config.url);
-    }
-    return response;
-  },
-  async (error) => {
-    // Get the original request configuration
-    const originalRequest = error.config;
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      console.error("API Error:", error.response.data);
 
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      console.error("Unauthorized access:", error.response?.data);
+      // Handle authentication errors
+      if (error.response.status === 401) {
+        // Clear any stored auth data
+        localStorage.removeItem("user");
 
-      // Instead of direct redirect, check if we're already on the login page
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
+        // Redirect to login if not already there
+        if (!window.location.pathname.includes("/login")) {
+          window.location.href = `/login?redirect=${window.location.pathname}`;
+        }
       }
-    } else if (error.code === "ERR_NETWORK") {
-      console.error("Network error - server may be down or CORS issue");
-      console.error("Error details:", error);
-
-      // Check if we should retry the request
-      if (!originalRequest._retry && originalRequest.method === "get") {
-        originalRequest._retry = true;
-        console.log("Retrying request after network error...");
-
-        // Wait a moment before retrying
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        return api(originalRequest);
-      }
-    } else {
-      console.error("API Error:", error.response?.data || error.message);
     }
-
     return Promise.reject(error);
   }
 );

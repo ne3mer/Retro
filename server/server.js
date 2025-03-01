@@ -9,6 +9,7 @@ const path = require("path");
 const movieRoutes = require("./routes/movieRoutes");
 const blogRoutes = require("./routes/blog");
 const authRoutes = require("./routes/auth");
+const postRoutes = require("./routes/posts");
 
 // Import models
 require("./models/Movie");
@@ -122,6 +123,7 @@ app.get("/", (req, res) => {
 app.use("/api/movies", movieRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/auth", authRoutes);
+app.use("/api/posts", postRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

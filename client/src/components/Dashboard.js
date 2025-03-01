@@ -19,16 +19,31 @@ const Dashboard = () => {
           setLoading(true);
           setError(null);
 
-          // Fetch favorite movies
-          const movies = await getFavoriteMovies();
-          setFavoriteMovies(movies);
+          // Fetch data in parallel
+          const [moviesResponse, postsResponse] = await Promise.allSettled([
+            getFavoriteMovies(),
+            axios.get("/api/posts/user"),
+          ]);
 
-          // Fetch user's blog posts
-          const postsResponse = await axios.get("/api/posts/user");
-          setUserPosts(postsResponse.data);
+          // Handle favorite movies response
+          if (moviesResponse.status === "fulfilled") {
+            setFavoriteMovies(moviesResponse.value);
+          } else {
+            console.error(
+              "Error fetching favorite movies:",
+              moviesResponse.reason
+            );
+          }
+
+          // Handle posts response
+          if (postsResponse.status === "fulfilled") {
+            setUserPosts(postsResponse.value.data);
+          } else {
+            console.error("Error fetching user posts:", postsResponse.reason);
+          }
         } catch (error) {
           console.error("Error fetching user data:", error);
-          setError("Failed to load user data");
+          setError("Failed to load user data. Please try again later.");
         } finally {
           setLoading(false);
         }
