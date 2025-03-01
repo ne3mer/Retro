@@ -89,6 +89,7 @@ const BlogList = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 5;
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchPosts();
@@ -97,12 +98,24 @@ const BlogList = () => {
   }, []);
 
   const fetchPosts = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
+      console.log("Fetching posts from:", "/api/blog/posts");
       const response = await axiosInstance.get("/api/blog/posts");
-      setPosts(response.data);
+      console.log("Posts response:", response.data);
+
+      if (Array.isArray(response.data)) {
+        setPosts(response.data);
+      } else {
+        console.error("Invalid posts data format:", response.data);
+        setError("Invalid response format from server");
+        setPosts([]);
+      }
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      console.error("Error fetching posts:", error.response || error);
+      setError(`Error fetching posts: ${error.message}`);
+      setPosts([]);
     } finally {
       setLoading(false);
     }

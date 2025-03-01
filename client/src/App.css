@@ -109,3 +109,61 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #00cc00;
 }
+
+/* Add responsive design for all components */
+@media screen and (max-width: 768px) {
+  .blog-page,
+  .post-detail,
+  .admin-panel {
+    padding: 1rem;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .terminal-input,
+  .terminal-btn {
+    font-size: 16px; /* Prevent zoom on mobile */
+    padding: 0.5rem;
+  }
+
+  .terminal-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .blog-post {
+    padding: 0.75rem;
+  }
+
+  .media-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Further optimization for small mobile screens */
+@media screen and (max-width: 480px) {
+  .blog-page,
+  .post-detail,
+  .admin-panel {
+    padding: 0.5rem;
+  }
+
+  .terminal-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .post-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .terminal-btn {
+    padding: 0.4rem 0.8rem;
+  }
+}

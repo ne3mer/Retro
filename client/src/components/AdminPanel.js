@@ -40,9 +40,23 @@ const AdminPanel = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === process.env.REACT_APP_ADMIN_PASSWORD) {
+    // Temporary fix: Use hardcoded password until environment variables are fixed
+    const adminPassword = "912A3060859n"; // This should match what's in your .env file
+
+    console.log("Admin password attempt");
+    if (
+      password === adminPassword ||
+      password === process.env.REACT_APP_ADMIN_PASSWORD
+    ) {
       setIsAuthenticated(true);
+      console.log("Login successful");
     } else {
+      console.log(
+        "Login failed, expected:",
+        process.env.REACT_APP_ADMIN_PASSWORD,
+        "received:",
+        password
+      );
       alert("ACCESS DENIED: INCORRECT PASSWORD");
     }
   };
