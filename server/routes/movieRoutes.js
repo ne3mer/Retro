@@ -37,7 +37,45 @@ router.get("/top-rated", async (req, res) => {
     });
 
     const data = validateTMDBResponse(response, "top rated movies");
-    res.json(data);
+
+    // Fetch additional details for each movie in parallel
+    const moviesWithDetails = await Promise.all(
+      data.results.map(async (movie) => {
+        try {
+          const detailsResponse = await axios.get(
+            `${TMDB_BASE_URL}/movie/${movie.id}`,
+            {
+              params: {
+                api_key: TMDB_API_KEY,
+                append_to_response: "credits",
+              },
+            }
+          );
+          const details = validateTMDBResponse(
+            detailsResponse,
+            `movie ${movie.id}`
+          );
+          return {
+            ...movie,
+            genres: details.genres,
+            credits: {
+              cast: details.credits.cast.slice(0, 5),
+              crew: details.credits.crew.filter(
+                (person) => person.job === "Director"
+              ),
+            },
+          };
+        } catch (error) {
+          console.error(`Error fetching details for movie ${movie.id}:`, error);
+          return movie;
+        }
+      })
+    );
+
+    res.json({
+      ...data,
+      results: moviesWithDetails,
+    });
   } catch (error) {
     console.error("[Movies] Error fetching top rated movies:", {
       error: error.message,
@@ -152,7 +190,7 @@ router.get("/favorites/:movieId/check", auth, async (req, res) => {
   }
 });
 
-// Get movie details (This should be the last route)
+// Get movie details
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -161,11 +199,23 @@ router.get("/:id", async (req, res) => {
     const response = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
       params: {
         api_key: TMDB_API_KEY,
-        append_to_response: "credits,videos",
+        append_to_response: "credits,videos,similar,recommendations",
       },
     });
 
     const data = validateTMDBResponse(response, `movie ${id}`);
+
+    // Add additional processing for cast and crew
+    if (data.credits) {
+      // Limit cast to main actors
+      data.credits.cast = data.credits.cast.slice(0, 10);
+
+      // Extract director from crew
+      data.director = data.credits.crew.find(
+        (person) => person.job === "Director"
+      );
+    }
+
     res.json(data);
   } catch (error) {
     console.error("[Movies] Error fetching movie details:", {
@@ -186,6 +236,51 @@ router.get("/:id", async (req, res) => {
       message: "Error fetching movie details",
       error: error.response?.data?.status_message || "SERVER_ERROR",
     });
+  }
+});
+
+// Get filter options
+router.get("/filters", async (req, res) => {
+  try {
+    // Fetch genres
+    const genresResponse = await axios.get(
+      `${TMDB_BASE_URL}/genre/movie/list`,
+      {
+        params: { api_key: TMDB_API_KEY },
+      }
+    );
+    const genres = validateTMDBResponse(genresResponse, "genres").genres;
+
+    // Get popular people (both actors and directors)
+    const peopleResponse = await axios.get(`${TMDB_BASE_URL}/person/popular`, {
+      params: { api_key: TMDB_API_KEY },
+    });
+    const people = validateTMDBResponse(peopleResponse, "people").results;
+
+    // Get years (from 1900 to current year)
+    const currentYear = new Date().getFullYear();
+    const years = Array.from(
+      { length: currentYear - 1900 + 1 },
+      (_, i) => currentYear - i
+    );
+
+    // Split people into actors and directors based on known_for_department
+    const actors = people
+      .filter((person) => person.known_for_department === "Acting")
+      .slice(0, 20);
+    const directors = people
+      .filter((person) => person.known_for_department === "Directing")
+      .slice(0, 20);
+
+    res.json({
+      genres,
+      actors,
+      directors,
+      years,
+    });
+  } catch (error) {
+    console.error("Error fetching filter options:", error);
+    res.status(500).json({ message: "Error fetching filter options" });
   }
 });
 
