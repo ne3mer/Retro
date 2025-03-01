@@ -5,6 +5,7 @@ import {
   getFallbackTopMovies,
 } from "../components/movieApi";
 import MatrixCodeRain from "../components/MatrixCodeRain";
+import axios from "axios";
 
 const TopMoviesPage = () => {
   const [movies, setMovies] = useState([]);
@@ -22,9 +23,11 @@ const TopMoviesPage = () => {
     const fetchMovies = async () => {
       setIsLoading(true);
       try {
-        const data = await getTopRatedMovies(currentPage);
-        setMovies(data.results);
-        setTotalPages(Math.min(data.total_pages, 13)); // Limit to first 250 movies (approx 13 pages at 20 per page)
+        const response = await axios.get(
+          `/api/movies/top-rated?page=${currentPage}`
+        );
+        setMovies(response.data.results);
+        setTotalPages(Math.min(response.data.total_pages, 13)); // Limit to first 250 movies
       } catch (error) {
         console.error("Error fetching movies:", error);
         setError("CONNECTION LOST. USING LOCAL DATABASE...");

@@ -49,6 +49,9 @@ const Dashboard = () => {
 
         <div className="dashboard-section">
           <h3>MY BLOG POSTS</h3>
+          <Link to="/admin" className="terminal-button create-post-btn">
+            CREATE NEW BLOG POST
+          </Link>
           <div className="posts-list">
             {user.posts && user.posts.length > 0 ? (
               user.posts.map((post) => (

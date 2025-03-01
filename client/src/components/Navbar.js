@@ -55,6 +55,13 @@ const Navbar = () => {
             <Link to="/dashboard" onClick={handleLinkClick}>
               DASHBOARD
             </Link>
+            <Link
+              to="/admin"
+              onClick={handleLinkClick}
+              className="create-post-link"
+            >
+              CREATE POST
+            </Link>
             {user.isAdmin && (
               <Link to="/admin" onClick={handleLinkClick}>
                 ADMIN

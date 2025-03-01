@@ -6,6 +6,7 @@ import Home from "./components/Home";
 import BlogPage from "./components/BlogPage";
 import RetroTerminalChat from "./components/RetroTerminalChat";
 import TopMoviesPage from "./components/TopMoviesPage";
+import MovieDetailPage from "./components/MovieDetailPage";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Dashboard from "./components/Dashboard";
@@ -50,6 +51,7 @@ const App = () => {
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/chat" element={<RetroTerminalChat />} />
                 <Route path="/top-movies" element={<TopMoviesPage />} />
+                <Route path="/movie/:id" element={<MovieDetailPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route

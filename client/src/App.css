@@ -520,3 +520,27 @@
 .App {
   padding-top: 4rem;
 }
+
+/* Create Post Link in Navbar */
+.create-post-link {
+  color: #0f0 !important;
+  font-weight: bold;
+  position: relative;
+}
+
+.create-post-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #0f0;
+  box-shadow: 0 0 5px #0f0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.create-post-link:hover::after {
+  opacity: 1;
+}
