@@ -38,6 +38,8 @@ app.use((req, res, next) => {
   const start = Date.now();
   console.log(`[REQUEST] ${req.method} ${req.url}`);
   console.log(`[HEADERS] ${JSON.stringify(req.headers)}`);
+  console.log(`[ENV] NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`[ENV] PORT: ${process.env.PORT}`);
 
   res.on("finish", () => {
     const duration = Date.now() - start;
@@ -51,11 +53,16 @@ app.use((req, res, next) => {
 
 // Health check route
 app.get("/health", (req, res) => {
+  console.log("[HEALTH] Health check requested");
   res.json({
     status: "healthy",
     timestamp: new Date().toISOString(),
     mongodb:
       mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    env: {
+      node_env: process.env.NODE_ENV,
+      port: process.env.PORT,
+    },
   });
 });
 
@@ -116,10 +123,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5001;
+// Use the PORT provided by Render or fall back to 10000
+const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`[SERVER] Server is running on port ${PORT}`);
+  console.log(
+    `[SERVER] Server address: ${server.address().address}:${
+      server.address().port
+    }`
+  );
   console.log("[SERVER] Available routes:");
   console.log("[SERVER] - GET /");
   console.log("[SERVER] - GET /health");
