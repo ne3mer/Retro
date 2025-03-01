@@ -4,6 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import BlogPage from "./components/BlogPage";
+import BlogPostDetail from "./components/BlogPostDetail";
 import RetroTerminalChat from "./components/RetroTerminalChat";
 import TopMoviesPage from "./components/TopMoviesPage";
 import MovieDetailPage from "./components/MovieDetailPage";
@@ -50,6 +51,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/blog" element={<BlogPage />} />
+                <Route path="/blog/:id" element={<BlogPostDetail />} />
                 <Route path="/chat" element={<RetroTerminalChat />} />
                 <Route path="/top-movies" element={<TopMoviesPage />} />
                 <Route path="/movie/:id" element={<MovieDetailPage />} />

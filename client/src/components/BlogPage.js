@@ -225,7 +225,7 @@ const BlogList = () => {
               <header>
                 <div className="post-header">
                   <h2>
-                    <Link to={`/blog/post/${post._id}`} className="post-link">
+                    <Link to={`/blog/${post._id}`} className="post-link">
                       {post.title}
                     </Link>
                   </h2>
