@@ -1,0 +1,14 @@
+{
+  "name": "retro-terminal-ai",
+  "version": "1.0.0",
+  "description": "RetroTerminal AI Chat Application",
+  "scripts": {
+    "start": "concurrently \"cd server && npm run start\" \"cd client && npm start\"",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm start\"",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

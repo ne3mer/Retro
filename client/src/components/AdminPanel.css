@@ -1,0 +1,151 @@
+.admin-panel {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  background-color: #000;
+}
+
+.terminal-header {
+  border-bottom: 2px solid #00ff00;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+}
+
+.terminal-header h1 {
+  font-size: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.status-line {
+  font-size: 0.9rem;
+  color: #00cc00;
+  margin-top: 0.5rem;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #00ff00;
+}
+
+.terminal-input {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #000;
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  font-size: 1rem;
+}
+
+.terminal-input:focus {
+  outline: none;
+  border-color: #00ff00;
+  box-shadow: 0 0 5px #00ff00;
+}
+
+textarea.terminal-input {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.terminal-btn {
+  background-color: #000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-family: "Courier New", monospace;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.terminal-btn:hover {
+  background-color: #00ff00;
+  color: #000;
+}
+
+.edit-btn {
+  border-color: #00ff00;
+  color: #00ff00;
+}
+
+.edit-btn:hover {
+  background-color: #00ff00;
+  color: #000;
+}
+
+.delete-btn {
+  background-color: #000;
+  color: #ff0000;
+  border-color: #ff0000;
+}
+
+.delete-btn:hover {
+  background-color: #ff0000;
+  color: #000;
+}
+
+.cancel-btn {
+  background-color: #000;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+.cancel-btn:hover {
+  background-color: #ffff00;
+  color: #000;
+}
+
+.posts-list {
+  margin-top: 2rem;
+  border-top: 2px solid #00ff00;
+  padding-top: 1rem;
+}
+
+.post-item {
+  border: 1px solid #00ff00;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  position: relative;
+}
+
+.post-item h3 {
+  margin: 0 0 0.5rem 0;
+}
+
+.post-date {
+  margin: 0 0 0.5rem 0;
+  color: #00cc00;
+  font-size: 0.9rem;
+}
+
+.post-tags {
+  margin: 0 0 1rem 0;
+  color: #00cc00;
+  font-size: 0.9rem;
+}
+
+.post-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+/* CRT effect enhancements */
+.crt-effect {
+  position: relative;
+}
