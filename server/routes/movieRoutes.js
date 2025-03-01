@@ -59,43 +59,6 @@ router.get("/top-rated", async (req, res) => {
   }
 });
 
-// Get movie details
-router.get("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    console.log("[Movies] Fetching movie details for ID:", id);
-
-    const response = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
-      params: {
-        api_key: TMDB_API_KEY,
-        append_to_response: "credits,videos",
-      },
-    });
-
-    const data = validateTMDBResponse(response, `movie ${id}`);
-    res.json(data);
-  } catch (error) {
-    console.error("[Movies] Error fetching movie details:", {
-      error: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-      movieId: req.params.id,
-    });
-
-    if (error.response?.status === 404) {
-      return res.status(404).json({
-        message: "Movie not found",
-        error: "NOT_FOUND",
-      });
-    }
-
-    res.status(500).json({
-      message: "Error fetching movie details",
-      error: error.response?.data?.status_message || "SERVER_ERROR",
-    });
-  }
-});
-
 // Get user's favorite movies
 router.get("/favorites", auth, async (req, res) => {
   try {
@@ -186,6 +149,43 @@ router.get("/favorites/:movieId/check", auth, async (req, res) => {
   } catch (error) {
     console.error("Error checking favorite status:", error);
     res.status(500).json({ message: "Error checking favorite status" });
+  }
+});
+
+// Get movie details (This should be the last route)
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("[Movies] Fetching movie details for ID:", id);
+
+    const response = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
+      params: {
+        api_key: TMDB_API_KEY,
+        append_to_response: "credits,videos",
+      },
+    });
+
+    const data = validateTMDBResponse(response, `movie ${id}`);
+    res.json(data);
+  } catch (error) {
+    console.error("[Movies] Error fetching movie details:", {
+      error: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      movieId: req.params.id,
+    });
+
+    if (error.response?.status === 404) {
+      return res.status(404).json({
+        message: "Movie not found",
+        error: "NOT_FOUND",
+      });
+    }
+
+    res.status(500).json({
+      message: "Error fetching movie details",
+      error: error.response?.data?.status_message || "SERVER_ERROR",
+    });
   }
 });
 
