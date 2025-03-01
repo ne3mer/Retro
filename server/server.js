@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 
 // Import routes
-const movieRoutes = require("./routes/movies");
+const movieRoutes = require("./routes/movieRoutes");
 const blogRoutes = require("./routes/blog");
 const postsRoutes = require("./routes/posts");
 const authRoutes = require("./routes/auth");
