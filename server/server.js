@@ -2,11 +2,14 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
+const path = require("path");
 
 // Import routes
 const movieRoutes = require("./routes/movies");
 const blogRoutes = require("./routes/blog");
 const postsRoutes = require("./routes/posts");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 
@@ -18,12 +21,10 @@ mongoose
 
 // CORS configuration
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "https://retro-ebon.vercel.app",
-    "https://retro.vercel.app",
-    "https://retroterminal.vercel.app",
-  ],
+  origin:
+    process.env.NODE_ENV === "production"
+      ? "https://retroterminal-ai.vercel.app"
+      : "http://localhost:3000",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -32,6 +33,7 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -56,13 +58,9 @@ app.get("/health", (req, res) => {
   console.log("[HEALTH] Health check requested");
   res.json({
     status: "healthy",
-    timestamp: new Date().toISOString(),
-    mongodb:
-      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-    env: {
-      node_env: process.env.NODE_ENV,
-      port: process.env.PORT,
-    },
+    environment: process.env.NODE_ENV,
+    port: process.env.PORT || 5001,
+    mongoConnection: mongoose.connection.readyState === 1,
   });
 });
 
@@ -91,6 +89,8 @@ console.log("[SETUP] Registering /api/movies routes");
 app.use("/api/movies", movieRoutes);
 console.log("[SETUP] Registering /api/posts routes");
 app.use("/api/posts", postsRoutes);
+console.log("[SETUP] Registering /api/auth routes");
+app.use("/api/auth", authRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -102,9 +102,9 @@ app.use((req, res) => {
     availableRoutes: {
       root: "/",
       health: "/health",
-      blog: "/api/blog/posts",
-      movies: "/api/movies",
-      posts: "/api/posts",
+      blog: "/api/blog/*",
+      movies: "/api/movies/*",
+      posts: "/api/posts/*",
     },
   });
 });
@@ -123,8 +123,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Use the PORT provided by Render or fall back to 10000
-const PORT = process.env.PORT || 10000;
+// Use the PORT provided by Render or fall back to 5001
+const PORT = process.env.PORT || 5001;
 
 const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`[SERVER] Server is running on port ${PORT}`);

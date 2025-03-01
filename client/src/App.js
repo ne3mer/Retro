@@ -1,11 +1,16 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import RetroTerminalChat from "./components/RetroTerminalChat";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
-import TopMoviesPage from "./components/TopMoviesPage";
-import MovieDetailPage from "./components/MovieDetailPage";
+import Home from "./components/Home";
+import Blog from "./components/Blog";
+import Chat from "./components/Chat";
+import TopMovies from "./components/TopMovies";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+import Dashboard from "./components/Dashboard";
 import AdminPanel from "./components/AdminPanel";
-import BlogPage from "./components/BlogPage";
+import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 
 class ErrorBoundary extends React.Component {
@@ -31,28 +36,45 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-function App() {
+const App = () => {
   return (
-    <div className="App crt-effect min-h-screen bg-black">
-      <div className="scan-lines"></div>
-      <div className="container mx-auto p-4">
-        <BrowserRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <ErrorBoundary>
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<RetroTerminalChat />} />
-              <Route path="/top-movies" element={<TopMoviesPage />} />
-              <Route path="/movie/:id" element={<MovieDetailPage />} />
-              <Route path="/admin" element={<AdminPanel />} />
-              <Route path="/blog/*" element={<BlogPage />} />
-            </Routes>
-          </ErrorBoundary>
-        </BrowserRouter>
-      </div>
-    </div>
+    <AuthProvider>
+      <Router>
+        <div className="App crt-effect min-h-screen bg-black">
+          <div className="scan-lines"></div>
+          <div className="container mx-auto p-4">
+            <ErrorBoundary>
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/top-movies" element={<TopMovies />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <PrivateRoute>
+                      <Dashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <PrivateRoute adminOnly>
+                      <AdminPanel />
+                    </PrivateRoute>
+                  }
+                />
+              </Routes>
+            </ErrorBoundary>
+          </div>
+        </div>
+      </Router>
+    </AuthProvider>
   );
-}
+};
 
 export default App;

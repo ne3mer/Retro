@@ -317,3 +317,161 @@
 .nav-links.open a:nth-child(5) {
   animation-delay: 0.5s;
 }
+
+/* Auth Form Styles */
+.auth-form {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #00ff00;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.auth-form h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.error-message {
+  color: #ff0000;
+  text-align: center;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.auth-link a {
+  color: #00ff00;
+  text-decoration: none;
+}
+
+.auth-link a:hover {
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+}
+
+/* Dashboard Styles */
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.dashboard h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  border: 1px solid #00ff00;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.dashboard-section h3 {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #00ff00;
+}
+
+.profile-info p {
+  margin-bottom: 1rem;
+}
+
+.profile-info span {
+  color: #00cc00;
+  margin-right: 0.5rem;
+}
+
+.activity-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-box {
+  text-align: center;
+  padding: 1.5rem;
+  border: 1px solid #00ff00;
+}
+
+.stat-box h4 {
+  margin-bottom: 1rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  color: #00ff00;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+}
+
+.posts-list,
+.movies-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.dashboard-post,
+.dashboard-movie {
+  padding: 1rem;
+  border: 1px solid #00ff00;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dashboard-post h4,
+.dashboard-movie h4 {
+  margin: 0;
+}
+
+.nav-button {
+  background: none;
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  background: #00ff00;
+  color: #000;
+}
+
+/* Responsive styles for auth forms and dashboard */
+@media screen and (max-width: 768px) {
+  .auth-form {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .dashboard {
+    padding: 1rem;
+  }
+
+  .activity-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .posts-list,
+  .movies-list {
+    grid-template-columns: 1fr;
+  }
+}
