@@ -99,9 +99,7 @@ router.get("/:id", async (req, res) => {
 // Get user's favorite movies
 router.get("/favorites", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).populate(
-      "favoriteMovies"
-    );
+    const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -135,9 +133,23 @@ router.post("/favorites/:movieId", auth, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const movieId = req.params.movieId;
-    const movieIndex = user.favoriteMovies.indexOf(movieId);
+    const movieId = parseInt(req.params.movieId, 10);
+    if (isNaN(movieId)) {
+      return res.status(400).json({ message: "Invalid movie ID" });
+    }
 
+    // Verify movie exists in TMDB
+    try {
+      await axios.get(`${TMDB_BASE_URL}/movie/${movieId}`, {
+        params: { api_key: TMDB_API_KEY },
+      });
+    } catch (error) {
+      return res
+        .status(404)
+        .json({ message: "Movie not found in TMDB database" });
+    }
+
+    const movieIndex = user.favoriteMovies.indexOf(movieId);
     if (movieIndex > -1) {
       user.favoriteMovies.splice(movieIndex, 1);
     } else {
@@ -148,6 +160,7 @@ router.post("/favorites/:movieId", auth, async (req, res) => {
     res.json({
       message: "Favorite status updated",
       isFavorite: movieIndex === -1,
+      favoriteMovies: user.favoriteMovies,
     });
   } catch (error) {
     console.error("Error toggling favorite:", error);
@@ -163,7 +176,12 @@ router.get("/favorites/:movieId/check", auth, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const isFavorite = user.favoriteMovies.includes(req.params.movieId);
+    const movieId = parseInt(req.params.movieId, 10);
+    if (isNaN(movieId)) {
+      return res.status(400).json({ message: "Invalid movie ID" });
+    }
+
+    const isFavorite = user.favoriteMovies.includes(movieId);
     res.json({ isFavorite });
   } catch (error) {
     console.error("Error checking favorite status:", error);
