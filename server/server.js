@@ -17,7 +17,12 @@ mongoose
 
 // CORS configuration
 const corsOptions = {
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: [
+    "http://localhost:3000",
+    "https://retroterminal-ai.vercel.app",
+    "https://retroterminal.vercel.app",
+    "https://retro.vercel.app",
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -26,6 +31,11 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Root route for API verification
+app.get("/", (req, res) => {
+  res.json({ message: "RetroTerminal API is running" });
+});
 
 // Routes
 app.use("/api/blog", blogRoutes);

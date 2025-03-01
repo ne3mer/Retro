@@ -2,7 +2,7 @@ import axios from "axios";
 
 const baseURL =
   process.env.NODE_ENV === "production"
-    ? "https://retroterminal-api.onrender.com"
+    ? "https://retro-64h4.onrender.com"
     : "http://localhost:5001";
 
 const instance = axios.create({
