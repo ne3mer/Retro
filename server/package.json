@@ -10,6 +10,7 @@
     "migrate:create": "node -e \"const fs=require('fs');const name=process.argv[1];const timestamp=new Date().toISOString().replace(/[^0-9]/g, '').slice(0,14);const filename=`migrations/scripts/${timestamp}_${name}.js`;fs.writeFileSync(filename, 'const mongoose = require(\\'mongoose\\');\\n\\nmodule.exports = {\\n  async up() {\\n    // Migration code here\\n  },\\n\\n  async down() {\\n    // Reversion code here\\n  }\\n};');console.log(`Created migration: ${filename}`);\" --"
   },
   "dependencies": {
+    "axios": "^1.8.1",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

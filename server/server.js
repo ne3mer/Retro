@@ -15,42 +15,57 @@ const app = express();
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+  })
   .then(() => console.log("[MongoDB] Connected successfully"))
   .catch((err) => console.error("[MongoDB] Connection error:", err));
 
 // CORS configuration
-const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? [
-          "https://retroterminal-ai.vercel.app",
-          "https://retro-64h4.onrender.com",
-          "https://retro.vercel.app",
-        ]
-      : "http://localhost:3000",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+const allowedOrigins = [
+  "https://retro-ebon.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+    ],
+  })
+);
 
 // Middleware
-app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
 // Request logging middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log(`Origin: ${req.headers.origin}`);
+  console.log("Origin:", req.headers.origin);
   next();
 });
 
 // Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/blog", blogRoutes);
 app.use("/api/movies", movieRoutes);
+app.use("/api/blog", blogRoutes);
 app.use("/api/posts", postsRoutes);
+app.use("/auth", authRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -66,12 +81,15 @@ app.get("/health", (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error("[ERROR]", err);
-  res.status(500).json({
-    message: "Something went wrong!",
-    error:
-      process.env.NODE_ENV === "production"
-        ? "Internal Server Error"
-        : err.message,
+  if (err.name === "UnauthorizedError") {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+  if (err.message === "Not allowed by CORS") {
+    return res.status(403).json({ message: "CORS not allowed" });
+  }
+  res.status(err.status || 500).json({
+    message: err.message || "Something went wrong!",
+    error: process.env.NODE_ENV === "production" ? null : err.stack,
   });
 });
 

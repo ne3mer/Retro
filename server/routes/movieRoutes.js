@@ -3,11 +3,10 @@ const router = express.Router();
 const axios = require("axios");
 
 // TMDB API configuration
-const TMDB_API_KEY =
-  process.env.TMDB_API_KEY || "3e3f0a46d6f2abc8e557d06b3fc21a77"; // Replace with your API key
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
-// Get top rated movies - This route must come BEFORE the /:id route
+// Get top rated movies
 router.get("/top-rated", async (req, res) => {
   try {
     const page = req.query.page || 1;
@@ -18,10 +17,20 @@ router.get("/top-rated", async (req, res) => {
       },
     });
 
+    if (!response.data) {
+      return res.status(404).json({ message: "No movies found" });
+    }
+
     res.json(response.data);
   } catch (error) {
     console.error("Error fetching top rated movies:", error);
-    res.status(500).json({ message: "Error fetching movies" });
+    if (error.response?.status === 404) {
+      return res.status(404).json({ message: "Movies not found" });
+    }
+    res.status(500).json({
+      message: "Error fetching movies",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 });
 
@@ -48,7 +57,10 @@ router.get("/:id", async (req, res) => {
     if (error.response?.status === 404) {
       return res.status(404).json({ message: "Movie not found" });
     }
-    res.status(500).json({ message: "Error fetching movie details" });
+    res.status(500).json({
+      message: "Error fetching movie details",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 });
 
