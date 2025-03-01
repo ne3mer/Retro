@@ -25,6 +25,11 @@ const postSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     media: [
       {
         type: {

@@ -56,7 +56,7 @@ const Navbar = () => {
               DASHBOARD
             </Link>
             <Link
-              to="/admin"
+              to="/create-post"
               onClick={handleLinkClick}
               className="create-post-link"
             >

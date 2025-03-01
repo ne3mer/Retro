@@ -11,6 +11,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Dashboard from "./components/Dashboard";
 import AdminPanel from "./components/AdminPanel";
+import CreatePost from "./components/CreatePost";
 import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 
@@ -59,6 +60,14 @@ const App = () => {
                   element={
                     <PrivateRoute>
                       <Dashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/create-post"
+                  element={
+                    <PrivateRoute>
+                      <CreatePost />
                     </PrivateRoute>
                   }
                 />
