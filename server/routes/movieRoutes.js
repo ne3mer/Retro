@@ -8,14 +8,24 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
 // Validate TMDB API key
 if (!TMDB_API_KEY) {
-  console.error("TMDB_API_KEY is not set in environment variables");
+  console.error("[CRITICAL] TMDB_API_KEY is not set in environment variables");
+  throw new Error("TMDB_API_KEY must be set in environment variables");
 }
+
+// Helper function to validate TMDB response
+const validateTMDBResponse = (response, context) => {
+  if (!response.data) {
+    console.error(`Invalid TMDB response for ${context}:`, response);
+    throw new Error("Invalid response from TMDB API");
+  }
+  return response.data;
+};
 
 // Get top rated movies
 router.get("/top-rated", async (req, res) => {
   try {
     const page = req.query.page || 1;
-    console.log("Fetching top rated movies, page:", page);
+    console.log("[Movies] Fetching top rated movies, page:", page);
 
     const response = await axios.get(`${TMDB_BASE_URL}/movie/top_rated`, {
       params: {
@@ -24,20 +34,14 @@ router.get("/top-rated", async (req, res) => {
       },
     });
 
-    if (!response.data || !response.data.results) {
-      console.error("Invalid response from TMDB API:", response.data);
-      return res.status(500).json({
-        message: "Invalid response from movie database",
-        error: "INVALID_RESPONSE",
-      });
-    }
-
-    res.json(response.data);
+    const data = validateTMDBResponse(response, "top rated movies");
+    res.json(data);
   } catch (error) {
-    console.error(
-      "Error fetching top rated movies:",
-      error.response?.data || error.message
-    );
+    console.error("[Movies] Error fetching top rated movies:", {
+      error: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
 
     if (error.response?.status === 404) {
       return res.status(404).json({
@@ -48,9 +52,7 @@ router.get("/top-rated", async (req, res) => {
 
     res.status(500).json({
       message: "Error fetching movies",
-      error: "SERVER_ERROR",
-      details:
-        process.env.NODE_ENV === "development" ? error.message : undefined,
+      error: error.response?.data?.status_message || "SERVER_ERROR",
     });
   }
 });
@@ -58,32 +60,25 @@ router.get("/top-rated", async (req, res) => {
 // Get movie details
 router.get("/:id", async (req, res) => {
   try {
-    console.log("Fetching movie details for ID:", req.params.id);
+    const { id } = req.params;
+    console.log("[Movies] Fetching movie details for ID:", id);
 
-    const response = await axios.get(
-      `${TMDB_BASE_URL}/movie/${req.params.id}`,
-      {
-        params: {
-          api_key: TMDB_API_KEY,
-          append_to_response: "credits,videos",
-        },
-      }
-    );
+    const response = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
+      params: {
+        api_key: TMDB_API_KEY,
+        append_to_response: "credits,videos",
+      },
+    });
 
-    if (!response.data) {
-      console.error("Invalid response from TMDB API:", response.data);
-      return res.status(500).json({
-        message: "Invalid response from movie database",
-        error: "INVALID_RESPONSE",
-      });
-    }
-
-    res.json(response.data);
+    const data = validateTMDBResponse(response, `movie ${id}`);
+    res.json(data);
   } catch (error) {
-    console.error(
-      "Error fetching movie details:",
-      error.response?.data || error.message
-    );
+    console.error("[Movies] Error fetching movie details:", {
+      error: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      movieId: req.params.id,
+    });
 
     if (error.response?.status === 404) {
       return res.status(404).json({
@@ -94,9 +89,7 @@ router.get("/:id", async (req, res) => {
 
     res.status(500).json({
       message: "Error fetching movie details",
-      error: "SERVER_ERROR",
-      details:
-        process.env.NODE_ENV === "development" ? error.message : undefined,
+      error: error.response?.data?.status_message || "SERVER_ERROR",
     });
   }
 });

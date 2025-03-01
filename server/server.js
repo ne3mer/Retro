@@ -10,6 +10,11 @@ const movieRoutes = require("./routes/movieRoutes");
 const blogRoutes = require("./routes/blog");
 const authRoutes = require("./routes/auth");
 
+// Import models
+require("./models/Movie");
+require("./models/User");
+require("./models/Blog");
+
 const app = express();
 
 // CORS configuration - MUST be before other middleware
