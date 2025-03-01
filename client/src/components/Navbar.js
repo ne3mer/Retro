@@ -1,41 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
-  return (
-    <div className="border-b border-green-500 pb-2 mb-4 flex justify-between items-center">
-      <div className="text-2xl text-green-500 font-mono">TERMINALX-9000</div>
+  const [isOpen, setIsOpen] = useState(false);
 
-      <div className="flex space-x-4">
-        <Link
-          to="/"
-          className="px-4 py-2 border border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-colors font-mono"
-        >
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <nav className="navbar crt-effect">
+      <div className="navbar-brand">
+        <Link to="/" className="nav-logo">
+          RETROTERMINAL
+        </Link>
+        <button className="burger-menu" onClick={toggleMenu}>
+          <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
+          <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
+          <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
+        </button>
+      </div>
+
+      <div className={`nav-links ${isOpen ? "open" : ""}`}>
+        <Link to="/" onClick={() => setIsOpen(false)}>
           HOME
         </Link>
-
-        <Link
-          to="/blog"
-          className="px-4 py-2 border border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-colors font-mono"
-        >
-          TERMINAL LOGS
+        <Link to="/blog" onClick={() => setIsOpen(false)}>
+          BLOG
         </Link>
-
-        <Link
-          to="/admin"
-          className="px-4 py-2 border border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-colors font-mono"
-        >
-          ADMIN TERMINAL
+        <Link to="/admin" onClick={() => setIsOpen(false)}>
+          ADMIN
         </Link>
-
-        <Link
-          to="/top-movies"
-          className="px-4 py-2 border border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-colors font-mono"
-        >
-          TOP 250 MOVIES
+        <Link to="/chat" onClick={() => setIsOpen(false)}>
+          CHAT
         </Link>
       </div>
-    </div>
+    </nav>
   );
 };
 
