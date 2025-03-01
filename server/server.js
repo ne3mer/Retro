@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 // Import routes
 const movieRoutes = require("./routes/movies");
 const blogRoutes = require("./routes/blog");
+const postsRoutes = require("./routes/posts");
 
 const app = express();
 
@@ -19,9 +20,9 @@ mongoose
 const corsOptions = {
   origin: [
     "http://localhost:3000",
-    "https://retroterminal-ai.vercel.app",
-    "https://retroterminal.vercel.app",
+    "https://retro-ebon.vercel.app",
     "https://retro.vercel.app",
+    "https://retroterminal.vercel.app",
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -34,17 +35,28 @@ app.use(express.json());
 
 // Root route for API verification
 app.get("/", (req, res) => {
-  res.json({ message: "RetroTerminal API is running" });
+  res.json({
+    message: "RetroTerminal API is running",
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Routes
 app.use("/api/blog", blogRoutes);
 app.use("/api/movies", movieRoutes);
+app.use("/api/posts", postsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: "Something went wrong!" });
+  res.status(500).json({
+    message: "Something went wrong!",
+    error:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "Internal Server Error",
+  });
 });
 
 const PORT = process.env.PORT || 5001;
