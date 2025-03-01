@@ -36,8 +36,10 @@ instance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
-      window.location.href = "/login";
+      // Instead of direct redirect, check if we're already on the login page
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login";
+      }
     }
     console.error("API Error:", error.response?.data || error.message);
     return Promise.reject(error);
