@@ -13,7 +13,6 @@ const authRoutes = require("./routes/auth");
 // Import models
 require("./models/Movie");
 require("./models/User");
-require("./models/Blog");
 
 const app = express();
 
@@ -98,6 +97,28 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.get("/", (req, res) => {
+  res.json({
+    status: "online",
+    version: "1.0.0",
+    environment: process.env.NODE_ENV || "development",
+    endpoints: {
+      auth: {
+        base: "/auth",
+        routes: ["/signup", "/login", "/logout", "/me"],
+      },
+      movies: {
+        base: "/api/movies",
+        routes: ["/top-rated", "/:id"],
+      },
+      blog: {
+        base: "/api/blog",
+        routes: ["/posts", "/posts/:id"],
+      },
+    },
+  });
+});
+
 app.use("/api/movies", movieRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/auth", authRoutes);
