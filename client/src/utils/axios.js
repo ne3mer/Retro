@@ -57,6 +57,11 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle unauthorized access
       console.error("Unauthorized access:", error.response?.data);
+
+      // Instead of direct redirect, check if we're already on the login page
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login";
+      }
     } else if (error.code === "ERR_NETWORK") {
       console.error("Network error - server may be down or CORS issue");
       console.error("Error details:", error);
