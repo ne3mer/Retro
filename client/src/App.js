@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
-import Blog from "./components/Blog";
-import Chat from "./components/Chat";
-import TopMovies from "./components/TopMovies";
+import BlogPage from "./components/BlogPage";
+import RetroTerminalChat from "./components/RetroTerminalChat";
+import TopMoviesPage from "./components/TopMoviesPage";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Dashboard from "./components/Dashboard";
@@ -47,9 +47,9 @@ const App = () => {
               <Navbar />
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/top-movies" element={<TopMovies />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/chat" element={<RetroTerminalChat />} />
+                <Route path="/top-movies" element={<TopMoviesPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route
