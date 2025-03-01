@@ -23,18 +23,19 @@ const TopMoviesPage = () => {
     const fetchMovies = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(
-          `/api/movies/top-rated?page=${currentPage}`
-        );
-        setMovies(response.data.results);
-        setTotalPages(Math.min(response.data.total_pages, 13)); // Limit to first 250 movies
+        const data = await getTopRatedMovies(currentPage);
+        if (data && data.results) {
+          setMovies(data.results);
+          setTotalPages(Math.min(data.total_pages || 1, 13)); // Limit to first 250 movies
+        } else {
+          throw new Error("Invalid response format");
+        }
       } catch (error) {
         console.error("Error fetching movies:", error);
         setError("CONNECTION LOST. USING LOCAL DATABASE...");
-        // Use fallback data if API fails
         const fallbackData = getFallbackTopMovies();
-        setMovies(fallbackData.results);
-        setTotalPages(fallbackData.total_pages);
+        setMovies(fallbackData.results || []);
+        setTotalPages(fallbackData.total_pages || 1);
       } finally {
         setIsLoading(false);
       }

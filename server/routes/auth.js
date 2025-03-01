@@ -111,21 +111,39 @@ router.get("/me", auth, async (req, res) => {
     console.log("Auth check for user:", req.user.userId);
 
     const user = await User.findById(req.user.userId)
-      .populate("posts")
-      .populate("favoriteMovies");
+      .populate({
+        path: "posts",
+        options: { sort: { createdAt: -1 } },
+      })
+      .populate("favoriteMovies")
+      .select("-password");
 
     if (!user) {
       console.log("Auth check failed: User not found");
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+        error: "USER_NOT_FOUND",
+      });
     }
 
-    console.log("Auth check successful");
-    res.json({ user: user.toPublicProfile() });
+    console.log("Auth check successful, returning user data");
+    res.json({
+      user: user.toPublicProfile(),
+      isAuthenticated: true,
+    });
   } catch (error) {
     console.error("Auth check error:", error);
-    res
-      .status(500)
-      .json({ message: "Error fetching user", error: error.message });
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+
+    res.status(500).json({
+      message: "Error fetching user data",
+      error: error.message,
+      code: "SERVER_ERROR",
+    });
   }
 });
 
