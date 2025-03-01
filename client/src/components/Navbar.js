@@ -26,15 +26,16 @@ const Navbar = () => {
   return (
     <nav className="navbar crt-effect">
       <div className="navbar-brand">
-        <Link to="/" className="nav-logo">
+        <Link to="/" className="nav-logo" onClick={handleLinkClick}>
           RETROTERMINAL
         </Link>
-        <button className="burger-menu" onClick={toggleMenu}>
-          <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
-          <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
-          <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
-        </button>
       </div>
+
+      <button className="burger-menu" onClick={toggleMenu}>
+        <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
+        <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
+        <div className={`burger-bar ${isOpen ? "open" : ""}`}></div>
+      </button>
 
       <div className={`nav-links ${isOpen ? "open" : ""}`}>
         <Link to="/" onClick={handleLinkClick}>
@@ -66,7 +67,7 @@ const Navbar = () => {
         ) : (
           <>
             <Link to="/login" onClick={handleLinkClick}>
-              LOGIN
+              SIGN IN
             </Link>
             <Link to="/signup" onClick={handleLinkClick}>
               SIGN UP

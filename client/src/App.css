@@ -188,7 +188,6 @@
 .navbar-brand {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   width: auto;
 }
 
@@ -203,8 +202,8 @@
 .nav-links {
   display: flex;
   gap: 1rem;
-  margin-left: auto;
   align-items: center;
+  margin-left: auto;
 }
 
 .nav-links a,
@@ -220,6 +219,7 @@
   text-align: center;
   min-width: 100px;
   box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+  cursor: pointer;
 }
 
 .nav-links a:hover,
@@ -269,9 +269,10 @@
 @media screen and (max-width: 768px) {
   .burger-menu {
     display: flex;
-    position: absolute;
+    position: fixed;
     right: 1rem;
     top: 1rem;
+    z-index: 1002;
   }
 
   .nav-links {
@@ -284,11 +285,10 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.95);
-    padding: 5rem 1rem 1rem;
-    z-index: 999;
+    padding-top: 5rem;
+    z-index: 1001;
     align-items: center;
     justify-content: flex-start;
-    overflow-y: auto;
   }
 
   .nav-links.open {
@@ -302,6 +302,27 @@
     margin: 0.5rem 0;
     font-size: 1.2rem;
     padding: 0.8rem 1rem;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .burger-menu {
+    display: none;
+  }
+
+  .nav-links {
+    display: flex !important;
+    position: static;
+    padding: 0;
+    background: none;
+    width: auto;
+    flex-direction: row;
+  }
+
+  .nav-links a,
+  .nav-button {
+    width: auto;
+    margin: 0;
   }
 }
 
@@ -498,21 +519,4 @@
 /* Add padding to main content to account for fixed navbar */
 .App {
   padding-top: 4rem;
-}
-
-@media screen and (min-width: 769px) {
-  .nav-links {
-    display: flex !important;
-    position: static;
-    padding: 0;
-    background: none;
-    width: auto;
-    flex-direction: row;
-  }
-
-  .nav-links a,
-  .nav-button {
-    width: auto;
-    margin: 0;
-  }
 }
