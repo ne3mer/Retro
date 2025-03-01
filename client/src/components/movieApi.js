@@ -1,44 +1,25 @@
 // src/services/movieApi.js
-import axios from "axios";
-
-// Using TMDB (The Movie Database) API
-const API_KEY = "a48263c4c028a8de6a15f323f065057a"; // Replace with your actual API key
-const BASE_URL = "https://api.themoviedb.org/3";
-
-// Create axios instance with base configuration
-const api = axios.create({
-  baseURL: BASE_URL,
-  params: {
-    api_key: API_KEY,
-    language: "en-US",
-  },
-});
+import api from "../utils/axios";
 
 // Get top rated movies (closest to "top 250" concept)
 export const getTopRatedMovies = async (page = 1) => {
   try {
-    const response = await api.get("/movie/top_rated", {
-      params: { page },
-    });
+    const response = await api.get(`/api/movies/top-rated?page=${page}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching top rated movies:", error);
-    throw error;
+    return getFallbackTopMovies();
   }
 };
 
 // Get movie details
 export const getMovieDetails = async (movieId) => {
   try {
-    const response = await api.get(`/movie/${movieId}`, {
-      params: {
-        append_to_response: "videos,credits",
-      },
-    });
+    const response = await api.get(`/api/movies/${movieId}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching movie details for ID ${movieId}:`, error);
-    throw error;
+    return getFallbackMovieDetails(movieId);
   }
 };
 

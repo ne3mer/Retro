@@ -8,7 +8,6 @@ const path = require("path");
 // Import routes
 const movieRoutes = require("./routes/movieRoutes");
 const blogRoutes = require("./routes/blog");
-const postsRoutes = require("./routes/posts");
 const authRoutes = require("./routes/auth");
 
 const app = express();
@@ -96,7 +95,6 @@ app.use((req, res, next) => {
 // Routes
 app.use("/api/movies", movieRoutes);
 app.use("/api/blog", blogRoutes);
-app.use("/api/posts", postsRoutes);
 app.use("/auth", authRoutes);
 
 // Health check endpoint
