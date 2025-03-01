@@ -177,15 +177,19 @@
   background-color: #000;
   color: #00ff00;
   border-bottom: 1px solid #00ff00;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
+  width: 100%;
 }
 
 .navbar-brand {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  justify-content: flex-start;
+  width: auto;
 }
 
 .nav-logo {
@@ -193,26 +197,37 @@
   text-decoration: none;
   font-size: 1.5rem;
   font-weight: bold;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
 }
 
 .nav-links {
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
+  margin-left: auto;
+  align-items: center;
 }
 
-.nav-links a {
+.nav-links a,
+.nav-button {
   color: #00ff00;
   text-decoration: none;
   padding: 0.5rem 1rem;
   border: 1px solid #00ff00;
   transition: all 0.3s ease;
   background-color: #000;
+  font-family: "VT323", monospace;
+  font-size: 1.1rem;
+  text-align: center;
+  min-width: 100px;
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-button:hover {
   background-color: #00ff00;
   color: #000;
   text-shadow: none;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
 }
 
 .burger-menu {
@@ -254,6 +269,9 @@
 @media screen and (max-width: 768px) {
   .burger-menu {
     display: flex;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
   }
 
   .nav-links {
@@ -267,22 +285,23 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.95);
     padding: 5rem 1rem 1rem;
-    z-index: 1000;
+    z-index: 999;
     align-items: center;
     justify-content: flex-start;
+    overflow-y: auto;
   }
 
   .nav-links.open {
     display: flex;
   }
 
-  .nav-links a {
+  .nav-links a,
+  .nav-button {
     width: 80%;
-    text-align: center;
-    font-size: 1.2rem;
+    max-width: 300px;
     margin: 0.5rem 0;
-    border: 1px solid #00ff00;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    font-size: 1.2rem;
+    padding: 0.8rem 1rem;
   }
 }
 
@@ -473,5 +492,27 @@
   .posts-list,
   .movies-list {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Add padding to main content to account for fixed navbar */
+.App {
+  padding-top: 4rem;
+}
+
+@media screen and (min-width: 769px) {
+  .nav-links {
+    display: flex !important;
+    position: static;
+    padding: 0;
+    background: none;
+    width: auto;
+    flex-direction: row;
+  }
+
+  .nav-links a,
+  .nav-button {
+    width: auto;
+    margin: 0;
   }
 }
