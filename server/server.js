@@ -13,17 +13,7 @@ const authRoutes = require("./routes/auth");
 
 const app = express();
 
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000,
-  })
-  .then(() => console.log("[MongoDB] Connected successfully"))
-  .catch((err) => console.error("[MongoDB] Connection error:", err));
-
-// CORS configuration
+// CORS configuration - MUST be before other middleware
 const allowedOrigins = [
   "https://retro-ebon.vercel.app",
   "https://retro.vercel.app",
@@ -33,10 +23,11 @@ const allowedOrigins = [
   "https://retro-64h4.onrender.com",
 ];
 
+// Configure CORS first, before any routes or other middleware
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
+      // Allow requests with no origin (like mobile apps, curl, or Postman)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.indexOf(origin) === -1) {
@@ -44,7 +35,7 @@ app.use(
           "The CORS policy for this site does not allow access from the specified Origin.";
         return callback(new Error(msg), false);
       }
-      return callback(null, origin);
+      return callback(null, true);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -62,14 +53,43 @@ app.use(
   })
 );
 
-// Middleware
+// Handle OPTIONS requests explicitly
+app.options("*", cors());
+
+// Other middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// Connect to MongoDB
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+  })
+  .then(() => console.log("[MongoDB] Connected successfully"))
+  .catch((err) => console.error("[MongoDB] Connection error:", err));
 
 // Request logging middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   console.log("Origin:", req.headers.origin);
+  console.log("Headers:", JSON.stringify(req.headers));
+  next();
+});
+
+// Cookie settings middleware
+app.use((req, res, next) => {
+  res.cookie = res.cookie.bind(res);
+  const originalCookie = res.cookie;
+  res.cookie = function (name, value, options = {}) {
+    return originalCookie.call(this, name, value, {
+      ...options,
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    });
+  };
   next();
 });
 
@@ -87,31 +107,20 @@ app.get("/health", (req, res) => {
     port: process.env.PORT || 5001,
     mongoConnection: mongoose.connection.readyState === 1,
     timestamp: new Date().toISOString(),
+    corsConfig: {
+      allowedOrigins,
+    },
   });
 });
 
-// Update cookie settings in auth routes
-app.use((req, res, next) => {
-  res.cookie = res.cookie.bind(res);
-  const originalCookie = res.cookie;
-  res.cookie = function (name, value, options = {}) {
-    return originalCookie.call(this, name, value, {
-      ...options,
-      sameSite: "none",
-      secure: true,
-      httpOnly: true,
-    });
-  };
-  next();
-});
-
-// Add CORS error handler before other error handlers
+// CORS error handler
 app.use((err, req, res, next) => {
   if (err.message.includes("CORS")) {
     console.error("CORS Error:", {
       origin: req.headers.origin,
       method: req.method,
       path: req.path,
+      headers: req.headers,
       error: err.message,
     });
     return res.status(403).json({
@@ -151,4 +160,5 @@ app.listen(PORT, "0.0.0.0", () => {
       process.env.NODE_ENV || "development"
     } mode`
   );
+  console.log(`[CORS] Allowed origins: ${allowedOrigins.join(", ")}`);
 });

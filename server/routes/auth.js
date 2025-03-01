@@ -9,6 +9,8 @@ router.post("/signup", async (req, res) => {
   try {
     const { username, email, password, name } = req.body;
 
+    console.log("Signup attempt:", { username, email, name });
+
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
@@ -24,6 +26,7 @@ router.post("/signup", async (req, res) => {
     });
 
     await user.save();
+    console.log("User created:", user._id);
 
     // Create token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
@@ -38,8 +41,10 @@ router.post("/signup", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    console.log("Token cookie set");
     res.status(201).json({ user: user.toPublicProfile() });
   } catch (error) {
+    console.error("Signup error:", error);
     res
       .status(500)
       .json({ message: "Error creating user", error: error.message });
@@ -50,18 +55,23 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log("Login attempt:", { username });
 
     // Find user
     const user = await User.findOne({ username });
     if (!user) {
+      console.log("Login failed: User not found");
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      console.log("Login failed: Invalid password");
       return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    console.log("Login successful:", user._id);
 
     // Create token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
@@ -76,31 +86,43 @@ router.post("/login", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    console.log("Token cookie set");
     res.json({ user: user.toPublicProfile() });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ message: "Error logging in", error: error.message });
   }
 });
 
 // Logout
 router.post("/logout", (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  console.log("User logged out");
   res.json({ message: "Logged out successfully" });
 });
 
 // Get current user
 router.get("/me", auth, async (req, res) => {
   try {
+    console.log("Auth check for user:", req.user.userId);
+
     const user = await User.findById(req.user.userId)
       .populate("posts")
       .populate("favoriteMovies");
 
     if (!user) {
+      console.log("Auth check failed: User not found");
       return res.status(404).json({ message: "User not found" });
     }
 
+    console.log("Auth check successful");
     res.json({ user: user.toPublicProfile() });
   } catch (error) {
+    console.error("Auth check error:", error);
     res
       .status(500)
       .json({ message: "Error fetching user", error: error.message });
