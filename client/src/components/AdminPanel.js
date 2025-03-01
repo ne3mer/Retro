@@ -44,6 +44,10 @@ const AdminPanel = () => {
     const adminPassword = "912A3060859n"; // This should match what's in your .env file
 
     console.log("Admin password attempt");
+    console.log("Entered password:", password);
+    console.log("Expected password:", adminPassword);
+    console.log("Environment password:", process.env.REACT_APP_ADMIN_PASSWORD);
+
     if (
       password === adminPassword ||
       password === process.env.REACT_APP_ADMIN_PASSWORD
