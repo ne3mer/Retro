@@ -3,27 +3,39 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { getFavoriteMovies } from "./movieApi";
 import MatrixCodeRain from "./MatrixCodeRain";
+import axios from "../utils/axios";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [favoriteMovies, setFavoriteMovies] = useState([]);
+  const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchFavorites = async () => {
+    const fetchUserData = async () => {
       if (user) {
         try {
+          setLoading(true);
+          setError(null);
+
+          // Fetch favorite movies
           const movies = await getFavoriteMovies();
           setFavoriteMovies(movies);
+
+          // Fetch user's blog posts
+          const postsResponse = await axios.get("/api/posts/user");
+          setUserPosts(postsResponse.data);
         } catch (error) {
-          console.error("Error fetching favorite movies:", error);
+          console.error("Error fetching user data:", error);
+          setError("Failed to load user data");
         } finally {
           setLoading(false);
         }
       }
     };
 
-    fetchFavorites();
+    fetchUserData();
   }, [user]);
 
   if (!user) {
@@ -54,9 +66,23 @@ const Dashboard = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center text-red-500 font-mono my-8">
+        <p>{error}</p>
+        <p className="mt-4">ERROR CODE: DATA_FETCH_FAILED</p>
+      </div>
+    );
+  }
+
   const getPosterUrl = (path) => {
     if (!path) return "/placeholder-poster.jpg";
     return `https://image.tmdb.org/t/p/w500${path}`;
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
@@ -86,7 +112,7 @@ const Dashboard = () => {
               </p>
               <p>
                 <span className="text-green-400">MEMBER SINCE:</span>{" "}
-                {new Date(user.createdAt).toLocaleDateString()}
+                {formatDate(user.createdAt)}
               </p>
             </div>
           </div>
@@ -98,7 +124,7 @@ const Dashboard = () => {
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <p className="text-4xl mb-2">{user.posts?.length || 0}</p>
+                <p className="text-4xl mb-2">{userPosts.length}</p>
                 <p className="text-green-400">BLOG POSTS</p>
               </div>
               <div className="text-center">
@@ -121,15 +147,18 @@ const Dashboard = () => {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {user.posts && user.posts.length > 0 ? (
-              user.posts.map((post) => (
+            {userPosts.length > 0 ? (
+              userPosts.map((post) => (
                 <div
                   key={post._id}
-                  className="border border-green-500 p-4 bg-black bg-opacity-60"
+                  className="border border-green-500 p-4 bg-black bg-opacity-60 hover:border-green-300 transition-colors"
                 >
                   <h4 className="text-lg mb-2 truncate">{post.title}</h4>
-                  <p className="text-green-400 text-sm mb-4">
-                    {new Date(post.createdAt).toLocaleDateString()}
+                  <p className="text-green-400 text-sm mb-2 truncate">
+                    {post.content}
+                  </p>
+                  <p className="text-green-400 text-xs mb-4">
+                    {formatDate(post.createdAt)}
                   </p>
                   <Link
                     to={`/blog/${post._id}`}
@@ -140,16 +169,32 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              <p className="text-green-400 col-span-3">
-                NO BLOG POSTS FOUND IN DATABASE
-              </p>
+              <div className="col-span-3 border border-green-500 p-4 bg-black bg-opacity-60 text-center">
+                <p className="text-green-400 mb-4">
+                  NO BLOG POSTS FOUND IN DATABASE
+                </p>
+                <Link
+                  to="/create-post"
+                  className="inline-block px-4 py-2 border border-green-500 hover:bg-green-500 hover:text-black transition-colors"
+                >
+                  CREATE YOUR FIRST POST
+                </Link>
+              </div>
             )}
           </div>
         </div>
 
         {/* Favorite Movies Section */}
         <div>
-          <h3 className="text-xl mb-4">FAVORITE MOVIES</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl">FAVORITE MOVIES</h3>
+            <Link
+              to="/top-movies"
+              className="px-4 py-2 border border-green-500 hover:bg-green-500 hover:text-black transition-colors"
+            >
+              BROWSE MOVIES
+            </Link>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {favoriteMovies.length > 0 ? (
               favoriteMovies.map((movie) => (
@@ -181,9 +226,17 @@ const Dashboard = () => {
                 </Link>
               ))
             ) : (
-              <p className="text-green-400 col-span-5">
-                NO FAVORITE MOVIES FOUND IN DATABASE
-              </p>
+              <div className="col-span-5 border border-green-500 p-4 bg-black bg-opacity-60 text-center">
+                <p className="text-green-400 mb-4">
+                  NO FAVORITE MOVIES FOUND IN DATABASE
+                </p>
+                <Link
+                  to="/top-movies"
+                  className="inline-block px-4 py-2 border border-green-500 hover:bg-green-500 hover:text-black transition-colors"
+                >
+                  BROWSE MOVIES TO ADD
+                </Link>
+              </div>
             )}
           </div>
         </div>

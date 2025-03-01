@@ -129,14 +129,14 @@ const MovieDetailPage = () => {
             disabled={favoriteLoading}
             className={`px-4 py-2 border font-mono transition-colors ${
               isFavorite
-                ? "border-red-500 text-red-500 hover:bg-red-500"
-                : "border-green-500 text-green-500 hover:bg-green-500"
-            } hover:text-black`}
+                ? "border-green-500 bg-green-500 text-black"
+                : "border-green-500 text-green-500 hover:bg-green-500 hover:text-black"
+            }`}
           >
             {favoriteLoading
               ? "PROCESSING..."
               : isFavorite
-              ? "REMOVE FROM FAVORITES"
+              ? "✓ ADDED TO FAVORITES"
               : "ADD TO FAVORITES"}
           </button>
         </div>
