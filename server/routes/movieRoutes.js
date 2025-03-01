@@ -99,8 +99,6 @@ router.get("/:id", async (req, res) => {
 // Get user's favorite movies
 router.get("/favorites", auth, async (req, res) => {
   try {
-    console.log("[Movies] Fetching favorite movies for user:", req.user.userId);
-
     const user = await User.findById(req.user.userId).populate(
       "favoriteMovies"
     );
@@ -108,73 +106,51 @@ router.get("/favorites", auth, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Get detailed movie info for each favorite
-    const favoriteMovies = await Promise.all(
-      user.favoriteMovies.map(async (movieId) => {
-        try {
-          const response = await axios.get(
-            `${TMDB_BASE_URL}/movie/${movieId}`,
-            {
-              params: {
-                api_key: TMDB_API_KEY,
-              },
-            }
-          );
-          return response.data;
-        } catch (error) {
-          console.error(`Error fetching movie ${movieId}:`, error);
-          return null;
-        }
-      })
-    );
+    // Fetch details for each favorite movie from TMDB
+    const moviePromises = user.favoriteMovies.map(async (movieId) => {
+      try {
+        const response = await axios.get(
+          `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`
+        );
+        return validateTMDBResponse(response, "favorite movie details");
+      } catch (error) {
+        console.error(`Error fetching movie ${movieId}:`, error);
+        return null;
+      }
+    });
 
-    // Filter out any null values from failed requests
-    const validMovies = favoriteMovies.filter((movie) => movie !== null);
-    res.json(validMovies);
+    const movies = (await Promise.all(moviePromises)).filter(Boolean);
+    res.json(movies);
   } catch (error) {
-    console.error("[Movies] Error fetching favorites:", error);
+    console.error("Error fetching favorite movies:", error);
     res.status(500).json({ message: "Error fetching favorite movies" });
   }
 });
 
-// Toggle favorite movie status
+// Toggle favorite movie
 router.post("/favorites/:movieId", auth, async (req, res) => {
   try {
-    const { movieId } = req.params;
-    console.log(
-      `[Movies] Toggling favorite status for movie ${movieId} by user ${req.user.userId}`
-    );
-
     const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if movie exists in TMDB
-    try {
-      await axios.get(`${TMDB_BASE_URL}/movie/${movieId}`, {
-        params: {
-          api_key: TMDB_API_KEY,
-        },
-      });
-    } catch (error) {
-      return res.status(404).json({ message: "Movie not found in database" });
+    const movieId = req.params.movieId;
+    const movieIndex = user.favoriteMovies.indexOf(movieId);
+
+    if (movieIndex > -1) {
+      user.favoriteMovies.splice(movieIndex, 1);
+    } else {
+      user.favoriteMovies.push(movieId);
     }
 
-    const movieIndex = user.favoriteMovies.indexOf(movieId);
-    if (movieIndex > -1) {
-      // Remove from favorites
-      user.favoriteMovies.splice(movieIndex, 1);
-      await user.save();
-      res.json({ message: "Movie removed from favorites", isFavorite: false });
-    } else {
-      // Add to favorites
-      user.favoriteMovies.push(movieId);
-      await user.save();
-      res.json({ message: "Movie added to favorites", isFavorite: true });
-    }
+    await user.save();
+    res.json({
+      message: "Favorite status updated",
+      isFavorite: movieIndex === -1,
+    });
   } catch (error) {
-    console.error("[Movies] Error toggling favorite:", error);
+    console.error("Error toggling favorite:", error);
     res.status(500).json({ message: "Error updating favorite status" });
   }
 });
@@ -182,17 +158,15 @@ router.post("/favorites/:movieId", auth, async (req, res) => {
 // Check if a movie is in user's favorites
 router.get("/favorites/:movieId/check", auth, async (req, res) => {
   try {
-    const { movieId } = req.params;
     const user = await User.findById(req.user.userId);
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const isFavorite = user.favoriteMovies.includes(movieId);
+    const isFavorite = user.favoriteMovies.includes(req.params.movieId);
     res.json({ isFavorite });
   } catch (error) {
-    console.error("[Movies] Error checking favorite status:", error);
+    console.error("Error checking favorite status:", error);
     res.status(500).json({ message: "Error checking favorite status" });
   }
 });

@@ -127,30 +127,24 @@ export const getFallbackMovieDetails = (movieId) => {
   );
 };
 
-// Get favorite status for a movie
+// Check if a movie is in user's favorites
 export const checkFavoriteStatus = async (movieId) => {
   try {
-    const response = await api.get(`/api/movies/favorites/${movieId}/check`);
+    const response = await api.get(`/auth/favorites/${movieId}`);
     return response.data.isFavorite;
   } catch (error) {
-    console.error(
-      `Error checking favorite status for movie ${movieId}:`,
-      error
-    );
+    console.error("Error checking favorite status:", error);
     return false;
   }
 };
 
-// Toggle favorite status
+// Toggle favorite status for a movie
 export const toggleFavorite = async (movieId) => {
   try {
-    const response = await api.post(`/api/movies/favorites/${movieId}`);
+    const response = await api.post(`/auth/favorites/${movieId}`);
     return response.data;
   } catch (error) {
-    console.error(
-      `Error toggling favorite status for movie ${movieId}:`,
-      error
-    );
+    console.error("Error toggling favorite:", error);
     throw error;
   }
 };
@@ -158,7 +152,7 @@ export const toggleFavorite = async (movieId) => {
 // Get user's favorite movies
 export const getFavoriteMovies = async () => {
   try {
-    const response = await api.get("/api/movies/favorites");
+    const response = await api.get("/auth/favorites");
     return response.data;
   } catch (error) {
     console.error("Error fetching favorite movies:", error);

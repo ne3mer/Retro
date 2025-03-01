@@ -195,4 +195,33 @@ router.post("/favorites/:movieId", auth, async (req, res) => {
   }
 });
 
+// Refresh token
+router.post("/refresh", auth, async (req, res) => {
+  try {
+    // Since auth middleware already verified the token, we can just create a new one
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    // Create new token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    // Set new cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.json({ token, user: user.toPublicProfile() });
+  } catch (error) {
+    console.error("Token refresh error:", error);
+    res.status(500).json({ message: "Error refreshing token" });
+  }
+});
+
 module.exports = router;

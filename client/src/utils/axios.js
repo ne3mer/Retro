@@ -44,23 +44,45 @@ api.interceptors.request.use(
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response) {
       console.error("API Error:", error.response.data);
 
       // Handle authentication errors
       if (error.response.status === 401) {
-        // Clear any stored auth data
-        localStorage.removeItem("user");
+        // Try to refresh the token first
+        try {
+          const refreshResponse = await api.post("/auth/refresh");
+          if (refreshResponse.data.token) {
+            // Retry the original request
+            return api(error.config);
+          }
+        } catch (refreshError) {
+          console.error("Token refresh failed:", refreshError);
+          // Clear any stored auth data
+          localStorage.removeItem("user");
 
-        // Redirect to login if not already there
+          // Only redirect to login if not already there and not trying to refresh
+          if (
+            !window.location.pathname.includes("/login") &&
+            !error.config.url.includes("/auth/refresh")
+          ) {
+            window.location.href = `/login?redirect=${encodeURIComponent(
+              window.location.pathname
+            )}`;
+          }
+        }
+      } else if (error.response.status === 403) {
+        console.error("Forbidden access:", error.response.data);
+        // Handle forbidden access (e.g., trying to access admin resources)
         if (!window.location.pathname.includes("/login")) {
-          window.location.href = `/login?redirect=${window.location.pathname}`;
+          window.location.href = "/";
         }
       }
     } else if (error.code === "ERR_NETWORK") {
       console.error("Network Error:", error);
-      // You might want to show a user-friendly error message here
+      // Show a user-friendly error message for network issues
+      throw new Error("Network error: Please check your internet connection");
     }
     return Promise.reject(error);
   }
