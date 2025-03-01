@@ -2,48 +2,56 @@ const jwt = require("jsonwebtoken");
 
 const auth = async (req, res, next) => {
   try {
-    console.log(
-      `[Auth] Checking authentication for ${req.method} ${req.originalUrl}`
-    );
-    console.log("[Auth] Headers:", req.headers);
-    console.log("[Auth] Cookies:", req.cookies);
-
-    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
-
-    if (!token) {
-      console.log("[Auth] No token found in cookies or headers");
-      return res.status(401).json({ message: "Authentication required" });
-    }
-
-    console.log("[Auth] Token found, verifying...");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (!decoded || !decoded.userId) {
-      console.log("[Auth] Invalid token payload:", decoded);
-      return res.status(401).json({ message: "Invalid token payload" });
-    }
-
-    req.user = decoded;
-    console.log(`[Auth] Token valid for user: ${decoded.userId}`);
-
-    next();
-  } catch (error) {
-    console.error("[Auth] Token verification failed:", error);
-    console.error("[Auth] Error details:", {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
+    // Log headers for debugging
+    console.log("[Auth] Headers:", {
+      origin: req.headers.origin,
+      cookie: req.headers.cookie,
+      authorization: req.headers.authorization,
     });
 
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Invalid token format" });
+    // Get token from cookie or Authorization header
+    let token = req.cookies.token;
+
+    if (!token && req.headers.authorization) {
+      token = req.headers.authorization.replace("Bearer ", "");
     }
 
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Token expired" });
+    if (!token) {
+      console.error("[Auth] No token found");
+      return res.status(401).json({ message: "No authentication token found" });
     }
 
-    res.status(401).json({ message: "Authentication failed" });
+    try {
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      if (!decoded || !decoded.userId) {
+        console.error("[Auth] Invalid token payload:", decoded);
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      // Add user info to request
+      req.user = {
+        userId: decoded.userId,
+        username: decoded.username,
+      };
+
+      next();
+    } catch (error) {
+      console.error("[Auth] Token verification failed:", error);
+
+      // Clear invalid token
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
+
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+  } catch (error) {
+    console.error("[Auth] Middleware error:", error);
+    res.status(500).json({ message: "Server error in auth middleware" });
   }
 };
 

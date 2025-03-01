@@ -24,7 +24,6 @@ const allowedOrigins = [
   "https://retro-bi0zcrnlx-ne3mers-projects.vercel.app",
   "http://localhost:3000",
   "http://localhost:3001",
-  "https://retro-64h4.onrender.com",
 ];
 
 // Configure CORS first, before any routes or other middleware
@@ -35,6 +34,7 @@ app.use(
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.indexOf(origin) === -1) {
+        console.error("CORS Error - Origin not allowed:", origin);
         const msg =
           "The CORS policy for this site does not allow access from the specified Origin.";
         return callback(new Error(msg), false);
@@ -49,11 +49,8 @@ app.use(
       "X-Requested-With",
       "Accept",
       "Origin",
-      "Cookie",
     ],
-    exposedHeaders: ["set-cookie"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
+    exposedHeaders: ["Set-Cookie"],
   })
 );
 
@@ -87,11 +84,16 @@ app.use((req, res, next) => {
   res.cookie = res.cookie.bind(res);
   const originalCookie = res.cookie;
   res.cookie = function (name, value, options = {}) {
+    const domain = req.headers.origin?.includes("localhost")
+      ? "localhost"
+      : ".vercel.app";
+
     return originalCookie.call(this, name, value, {
       ...options,
       sameSite: "none",
       secure: true,
       httpOnly: true,
+      domain: domain,
     });
   };
   next();

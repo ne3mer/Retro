@@ -13,7 +13,7 @@ console.log(
 );
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5001",
+  baseURL,
   withCredentials: true,
   timeout: 30000, // Increased timeout for Render's cold start
   headers: {
@@ -28,11 +28,10 @@ api.interceptors.request.use(
     // Log the request in development
     if (!isProduction) {
       console.log("API Request:", config.method?.toUpperCase(), config.url);
-      console.log("Request headers:", config.headers);
     }
 
-    // Ensure credentials are included in every request
-    config.withCredentials = true;
+    // Add origin header for CORS
+    config.headers["Origin"] = window.location.origin;
 
     return config;
   },
@@ -59,6 +58,9 @@ api.interceptors.response.use(
           window.location.href = `/login?redirect=${window.location.pathname}`;
         }
       }
+    } else if (error.code === "ERR_NETWORK") {
+      console.error("Network Error:", error);
+      // You might want to show a user-friendly error message here
     }
     return Promise.reject(error);
   }
