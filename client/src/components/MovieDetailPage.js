@@ -8,6 +8,7 @@ const MovieDetailPage = () => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedTrailer, setSelectedTrailer] = useState(null);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -18,6 +19,12 @@ const MovieDetailPage = () => {
         const response = await axios.get(`/api/movies/${id}`);
         console.log("Movie details response:", response.data);
         setMovie(response.data);
+
+        // Set the first YouTube trailer as selected if available
+        const youtubeTrailer = response.data.videos?.results?.find(
+          (video) => video.type === "Trailer" && video.site === "YouTube"
+        );
+        setSelectedTrailer(youtubeTrailer);
       } catch (err) {
         console.error("Error fetching movie details:", err);
         setError(err.response?.data?.message || "Failed to load movie details");
@@ -34,6 +41,11 @@ const MovieDetailPage = () => {
   const getPosterUrl = (path) => {
     if (!path) return "/placeholder-poster.jpg";
     return `https://image.tmdb.org/t/p/w500${path}`;
+  };
+
+  const getProfileUrl = (path) => {
+    if (!path) return "/placeholder-profile.jpg";
+    return `https://image.tmdb.org/t/p/w185${path}`;
   };
 
   if (loading) {
@@ -127,7 +139,7 @@ const MovieDetailPage = () => {
             )}
 
             {/* Additional movie details */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <h3 className="text-xl mb-2">RUNTIME:</h3>
                 <p>{movie.runtime} minutes</p>
@@ -139,6 +151,56 @@ const MovieDetailPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Trailer Section */}
+        {selectedTrailer && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-mono text-green-500 mb-4">
+              OFFICIAL TRAILER:
+            </h2>
+            <div className="relative pt-[56.25%]">
+              <iframe
+                className="absolute inset-0 w-full h-full border-2 border-green-500"
+                src={`https://www.youtube.com/embed/${selectedTrailer.key}`}
+                title="Movie Trailer"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        )}
+
+        {/* Cast Section */}
+        {movie.credits?.cast && movie.credits.cast.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-mono text-green-500 mb-4">
+              CAST MEMBERS:
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {movie.credits.cast.slice(0, 12).map((actor) => (
+                <div
+                  key={actor.id}
+                  className="border border-green-500 p-2 text-center bg-black bg-opacity-60"
+                >
+                  <img
+                    src={getProfileUrl(actor.profile_path)}
+                    alt={actor.name}
+                    className="w-full h-48 object-cover mb-2"
+                    onError={(e) => {
+                      e.target.src = "/placeholder-profile.jpg";
+                    }}
+                  />
+                  <p className="text-green-500 font-mono text-sm truncate">
+                    {actor.name}
+                  </p>
+                  <p className="text-green-400 font-mono text-xs truncate">
+                    {actor.character}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
