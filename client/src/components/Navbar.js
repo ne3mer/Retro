@@ -34,6 +34,9 @@ const Navbar = () => {
         <Link to="/chat" onClick={() => setIsOpen(false)}>
           CHAT
         </Link>
+        <Link to="/top-movies" onClick={() => setIsOpen(false)}>
+          TOP 250 MOVIES
+        </Link>
       </div>
     </nav>
   );
