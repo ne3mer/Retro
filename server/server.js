@@ -26,6 +26,7 @@ mongoose
 // CORS configuration
 const allowedOrigins = [
   "https://retro-ebon.vercel.app",
+  "https://retro.vercel.app",
   "http://localhost:3000",
   "http://localhost:3001",
 ];
@@ -33,11 +34,15 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
       }
+      return callback(null, true);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -46,7 +51,11 @@ app.use(
       "Authorization",
       "X-Requested-With",
       "Accept",
+      "Origin",
     ],
+    exposedHeaders: ["set-cookie"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
 );
 
@@ -78,14 +87,29 @@ app.get("/health", (req, res) => {
   });
 });
 
+// Add CORS error handler before other error handlers
+app.use((err, req, res, next) => {
+  if (err.message.includes("CORS")) {
+    console.error("CORS Error:", {
+      origin: req.headers.origin,
+      method: req.method,
+      path: req.path,
+      error: err.message,
+    });
+    return res.status(403).json({
+      error: "CORS Error",
+      message: "Origin not allowed",
+      allowedOrigins,
+    });
+  }
+  next(err);
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error("[ERROR]", err);
   if (err.name === "UnauthorizedError") {
     return res.status(401).json({ message: "Invalid token" });
-  }
-  if (err.message === "Not allowed by CORS") {
-    return res.status(403).json({ message: "CORS not allowed" });
   }
   res.status(err.status || 500).json({
     message: err.message || "Something went wrong!",
