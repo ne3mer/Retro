@@ -13,8 +13,8 @@ const app = express();
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .then(() => console.log("[MongoDB] Connected successfully"))
+  .catch((err) => console.error("[MongoDB] Connection error:", err));
 
 // CORS configuration
 const corsOptions = {
@@ -35,46 +35,76 @@ app.use(express.json());
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  const start = Date.now();
+  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  console.log(`[HEADERS] ${JSON.stringify(req.headers)}`);
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(
+      `[RESPONSE] ${req.method} ${req.url} - Status: ${res.statusCode} - Duration: ${duration}ms`
+    );
+  });
+
   next();
+});
+
+// Health check route
+app.get("/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    mongodb:
+      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+  });
 });
 
 // Root route for API verification
 app.get("/", (req, res) => {
+  console.log("[ROOT] Serving root endpoint");
   res.json({
     message: "RetroTerminal API is running",
     environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
+    mongodb_status:
+      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
     routes: {
-      blog: "/api/blog/*",
-      movies: "/api/movies/*",
-      posts: "/api/posts/*",
+      health: "/health",
+      blog: "/api/blog/posts",
+      movies: "/api/movies",
+      posts: "/api/posts",
     },
   });
 });
 
 // Routes
+console.log("[SETUP] Registering /api/blog routes");
 app.use("/api/blog", blogRoutes);
+console.log("[SETUP] Registering /api/movies routes");
 app.use("/api/movies", movieRoutes);
+console.log("[SETUP] Registering /api/posts routes");
 app.use("/api/posts", postsRoutes);
 
 // 404 handler
 app.use((req, res) => {
+  console.log(`[404] Route not found: ${req.method} ${req.url}`);
   res.status(404).json({
     message: "Route not found",
     path: req.url,
     method: req.method,
     availableRoutes: {
-      blog: "/api/blog/*",
-      movies: "/api/movies/*",
-      posts: "/api/posts/*",
+      root: "/",
+      health: "/health",
+      blog: "/api/blog/posts",
+      movies: "/api/movies",
+      posts: "/api/posts",
     },
   });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error("Error:", err.stack);
+  console.error("[ERROR]", err.stack);
   res.status(500).json({
     message: "Something went wrong!",
     error:
@@ -90,9 +120,10 @@ const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`[SERVER] Server is running on port ${PORT}`);
-  console.log(`[SERVER] Available routes:`);
-  console.log(`[SERVER] - GET /`);
-  console.log(`[SERVER] - /api/blog/*`);
-  console.log(`[SERVER] - /api/movies/*`);
-  console.log(`[SERVER] - /api/posts/*`);
+  console.log("[SERVER] Available routes:");
+  console.log("[SERVER] - GET /");
+  console.log("[SERVER] - GET /health");
+  console.log("[SERVER] - GET /api/blog/posts");
+  console.log("[SERVER] - GET /api/movies");
+  console.log("[SERVER] - GET /api/posts");
 });
